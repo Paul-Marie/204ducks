@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+
+import  sys
+import  math
+
+def     man_help():
+    """ This function will print the help """
+    print("USAGE")
+    print("\t./204ducks a\n")
+    print("DESCRIPTION")
+    print("\ta\tconstant")
+
+def     get_proba(a, t, mode = 0):
+    return -a * math.exp(-t) - (4 - 3 * a) / 2 * math.exp(-2 * t) - (2 * a - 4) / 4 * math.exp(-4 * t) if mode == 0 else a * math.exp(-t) + (4 - 3 * a) * math.exp(-2 * t) + (2 * a - 4) * math.exp(-4 * t)
+
+def     get_average_time(a):
+    result = float(0)
+    t = float(0)
+    while t < 10:
+        result += get_proba(a, t, 1) * t / 1000
+        t += 0.001
+    return result
+
+def     get_standard_deviation(a, average_time):
+    result = float(0)
+    t = float(0)
+    while t < 100:
+        result += pow(t - average_time, 2) * get_proba(a, t, 1) / 1000
+        t += 0.001
+    result = math.sqrt(result)
+    return result
+
+def     get_come_back(a, percent):
+    t = 0.0
+    while t < 1000:
+        if get_proba(a, t / 60) - get_proba(a, 0) >= percent:
+            return t
+        t += 0.002
+    raise ValueError("This gonna too far...")
+
+def     print_result(a):
+    """
+    """
+    if a == None:
+        raise BaseException("invalid number (0 <= a <= 2.5)")
+    average_time = get_average_time(a)
+    standard_deviation = get_standard_deviation(a, average_time)
+    time_50_percent = get_come_back(a, 0.5)
+    time_99_percent = get_come_back(a, 0.99)
+    duck_1_percent = (get_proba(a, 1) - get_proba(a, 0)) * 100
+    duck_2_percent = (get_proba(a, 2) - get_proba(a, 0)) * 100
+    print("average return time:  " + str(int(average_time))
+          + "m " + "%ds" % math.ceil((average_time - int(average_time)) * 60))
+    print("standard deviation:  " + "%.3f" % standard_deviation)
+    print("time after which 50%% of the ducks come back:  %dm %d%ds"
+          % (time_50_percent / 60, time_50_percent % 60 / 10, time_50_percent % 10))
+    print("time after which 99%% of the ducks come back:  %dm %d%ds"
+          % (time_99_percent / 60, time_99_percent % 60 / 10, time_99_percent % 10))
+    print("percentage of ducks back after 1 minute:  %.1f%%" % duck_1_percent)
+    print("percentage of ducks back after 2 minutes:  %.1f%%" % duck_2_percent)
+
+# Do not put more information in this function, it's must be clearer as possible
+def     main():
+    """ Main function who perform program's core action like arguments resolution """
+    try:
+        if len(sys.argv) == 2:
+            if sys.argv[1] == "-h":
+                man_help()
+            else:
+                print_result(float(sys.argv[1]) if float(sys.argv[1]) >= 0
+                             and float(sys.argv[1]) <= 2.5 else None)
+        else:
+            raise BaseException("invalid argument's number")
+    except BaseException as error:
+        sys.stdout.write(str(type(error).__name__) + ": {}\n".format(error))
+        sys.exit(84)
+
+if __name__ == "__main__":
+    main()
